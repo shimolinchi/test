@@ -3,7 +3,7 @@
 #define ROPO_API_HPP
 
 namespace RopoApi{
-	typedef float FloatType;
+	typedef double FloatType;
 }
 
 #endif //ROPO_API_HPP

@@ -18,8 +18,8 @@ namespace RopoChassis{
 	// Code
 	class TankChassis{
 		private:
-			static constexpr float WheelRad = 0.042215;
-			static constexpr float ChassisParameter = (0.2855+0.2855)/2;
+			static constexpr float WheelRad = 0.041275;
+			static constexpr float ChassisParameter = (0.285+0.2855)/2;//0.2855
 			static constexpr float DefaultVelocityLimits = 600;
 
 			RopoControl::TankChassisCore Core;
@@ -37,14 +37,19 @@ namespace RopoChassis{
 			} AutoMoveType;
 			RopoMath::Vector<FloatType> (*GetCurPosition)();
 			RopoMath::Vector<FloatType> AimPosition;
-			FloatType PosErrorTolerance;
 			FloatType DegErrorTolerance;
 			bool Arrived;
 
 			pros::Task* BackgroundTask;
 
 			void OpenLoopMove(const RopoMath::Vector<FloatType>& Velocity) {
-				MotorVelocity = Core.Move(Velocity);
+				const FloatType ChassisRatio = 7.0 / 5.0;
+				const FloatType radTorpm = 600 / 62.83;
+				static RopoMath::Vector<RopoApi::FloatType> _Velocity(RopoMath::ColumnVector,2);
+				_Velocity = Velocity;
+				_Velocity[1] = _Velocity[1] * ChassisRatio * radTorpm;
+				_Velocity[2] = _Velocity[2] * ChassisRatio * radTorpm;
+				MotorVelocity = Core.Move(_Velocity);
 				MotorMove[0](MotorVelocity[1]);
 				MotorMove[1](MotorVelocity[2]);
 			}
@@ -65,24 +70,27 @@ namespace RopoChassis{
 			TankChassis(	void (*RightMotorMove)(FloatType),
 							void (*LeftMotorMove )(FloatType),
 							RopoMath::Vector<FloatType> (*GetPosition_)(),
-							int _SampleTime = 20):
+							int _SampleTime = 5):
 				Core( WheelRad, ChassisParameter, DefaultVelocityLimits),
 				MotorMove{  RightMotorMove,LeftMotorMove},
 				ChassisVelocity(RopoMath::ColumnVector,2),SampleTime(_SampleTime),
 				AutoMoveType(Disable),GetCurPosition(GetPosition_),AimPosition(RopoMath::ColumnVector,3),
-				PosErrorTolerance(0.1),DegErrorTolerance(5),Arrived(false),
+				DegErrorTolerance(5),Arrived(false),
 				BackgroundTask(nullptr){
 				BackgroundTask = new pros::Task(ChassisMoveBackgroundFunction,this);
 			}
 
 			void SetVelocityLimits(FloatType VelocityLimits) {Core.SetVelocityLimits(VelocityLimits);}
-			void SetPosErrorTolerance(FloatType ErrorTolerance) {PosErrorTolerance = ErrorTolerance;}
 			void SetDegErrorTolerance(FloatType ErrorTolerance) {DegErrorTolerance = ErrorTolerance;}
 			RopoMath::Vector<FloatType> GetChassisVelocity(){return ChassisVelocity;}
 			RopoMath::Vector<FloatType> GetMotorVelocity(){return MotorVelocity;}
 			bool IfArrived(){return Arrived;}
 			void MoveVelocity(const RopoMath::Vector<FloatType>& Velocity) {
 				ChassisVelocity = Velocity, AutoMoveType = Disable;
+			}
+			void MoveVelocity(RopoApi::FloatType X,RopoApi::FloatType W){
+				ChassisVelocity[1] = X;
+				ChassisVelocity[2] = W;
 			}
 	};
 }

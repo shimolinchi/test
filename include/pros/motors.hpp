@@ -1211,6 +1211,7 @@ class Motor_Group {
 	 * if the operation failed, setting errno.
 	 */
 	std::vector<double> get_positions(void);
+	
 	/**
 	 * Gets the efficiency of the motors in percent.
 	 *

@@ -41,7 +41,6 @@
  */
 //#include "okapi/api.hpp"
 //#include "pros/api_legacy.h"
-
 #include "RopoMath/Header.hpp"
 #include "RopoSensor/Header.hpp"
 #include "RopoControl/Header.hpp"
@@ -50,6 +49,8 @@
 #include "RopoDevice.hpp"
 #include "RopoTask.hpp"
 #include "RopoChassis.hpp"
+#include "RopoPosition.hpp"
+#include "RopoThrower.hpp"
 /**
  * If you find doing pros::Motor() to be tedious and you'd prefer just to do
  * Motor, you can use the namespace with the following commented out line.
